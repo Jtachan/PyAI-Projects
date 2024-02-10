@@ -40,7 +40,17 @@ class SudokuBackTrkSolver:
 
         Parameters
         ----------
+        guess: int
+            Number to be checked.
+        tile_row : int
+            Row coordinate in which the tile is positioned.
+        tile_col : int
+            Column coordinate in which the tile is positioned.
 
+        Returns
+        -------
+        bool :
+            Whether the guess is valid.
         """
         # Guess not contained in the row or the column
         row, col = self._board[tile_row], self._board[..., tile_col]
@@ -70,7 +80,13 @@ class SudokuBackTrkSolver:
         -----------------
         1. An empty space is searched for within the board. Only if the board is solved
            there won't be any.
-        2. A guess is made and checked to be valid for the coordinates.
+        2. A guess is made and checked to be valid for the coordinates (empty space).
+        3. With a valid guess, the algorithm calls itself recursively repeating
+           previous steps.
+        4. If any guess was not the correct number, the guesses are deleted until the
+           last one in which there were at least one possible guess left.
+        5. The algorithm continues until the puzzle is solved or the puzzle is found
+           to be unsolvable.
         """
         try:
             row_idx, col_idx = np.array(np.where(self._board == None)).T[0]
