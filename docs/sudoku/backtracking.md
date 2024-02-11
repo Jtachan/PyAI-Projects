@@ -1,5 +1,7 @@
 # Sudoku solver: Backtracking algorithm
 
+[_See the code_](../../src/sudoku/backtracking_solver.py)
+
 The backtracking algorithm is a very simple algorithm to be used as a sudoku solver.
 It iterates over the following steps:
 
