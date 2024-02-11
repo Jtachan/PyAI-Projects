@@ -6,5 +6,4 @@ Any explanation is documented at the `docs` folder, while all codes are at the `
 
 ## Index
 
-- **Sudoku solver**
-  - [_Backtracking_](docs/sudoku/backtracking.md)
+- [Sudoku solver](docs/sudoku_solver.md)

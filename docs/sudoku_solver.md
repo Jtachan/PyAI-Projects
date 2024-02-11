@@ -1,6 +1,15 @@
-# Sudoku solver: Backtracking algorithm
+# Sudoku solver
 
-[_See the code_](../../src/sudoku/backtracking_solver.py)
+There are multiple algorithms to solve a sudoku. 
+Here I document those I have generated a code for.
+
+- [Backtracking algorithm](#backtracking-algorithm)
+
+----
+
+## Backtracking algorithm
+
+[_See the code_](../src/sudoku/backtracking_solver.py)
 
 The backtracking algorithm is a very simple algorithm to be used as a sudoku solver.
 It iterates over the following steps:
@@ -11,4 +20,4 @@ It iterates over the following steps:
 4. **Go back** to the last created branch if the puzzle reach a tile in which no valid guesses can be done.
 5. **Iterate until a solution is found**.
 
-![backtrk_tree](../imgs/backtracking_decision_tree.png)
+![backtrk_tree](imgs/backtracking_decision_tree.png)
