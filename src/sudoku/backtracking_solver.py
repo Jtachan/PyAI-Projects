@@ -1,6 +1,8 @@
 """
 Here is contained all codes to solve a sudoku using backtracking
 """
+from typing import Iterator
+
 import numpy as np
 
 from sudoku import Sudoku
@@ -13,7 +15,13 @@ class UnsolvableSudoku(ValueError):
 class BacktrackingSolver:
     """Class to solve a sudoku puzzle using backtracking"""
 
-    def __init__(self, width: int = 3, height: int = 3, difficulty: float = 0.3):
+    def __init__(
+        self,
+        width: int = 3,
+        height: int = 3,
+        difficulty: float = 0.3,
+        verbose: bool = True,
+    ):
         """
         Initializes the solver, generating a sudoku with it.
 
@@ -26,8 +34,10 @@ class BacktrackingSolver:
         difficulty : float
             Difficulty level for the sudoku, defining the percentage of cells that
             won't contain digits.
+        verbose : bool
+            If True, prints the initial state and the solution when 'solve()' is called.
         """
-        sudoku = Sudoku(width=width, height=height).difficulty(difficulty)
+        sudoku = Sudoku(width=width, height=height, seed=123).difficulty(difficulty)
         self._board = np.array(
             [
                 [digit if digit is not None else 0 for digit in row]
@@ -38,16 +48,15 @@ class BacktrackingSolver:
         self._height = height
         self._width = width
         self._max_digit = height * width
+        self._verbose = verbose
 
-    def _is_valid_guess(self, guess: int, tile_row: int, tile_col: int) -> bool:
+    def _valid_guesses(self, tile_row: int, tile_col: int) -> Iterator[int]:
         """
-        Checks if a number is valid for the given coordinates. A valid guess is any
-        number not contained in the row, column or major tile.
+        Gets all valid numbers (guesses) for the given coordinates. A valid guess is
+        any number not contained in the row, column or major tile.
 
         Parameters
         ----------
-        guess: int
-            Number to be checked.
         tile_row : int
             Row coordinate in which the tile is positioned.
         tile_col : int
@@ -60,18 +69,20 @@ class BacktrackingSolver:
         """
         # Guess not contained in the row or the column
         row, col = self._board[tile_row], self._board[..., tile_col]
-        if guess in row or guess in col:
-            return False
 
-        # Guess not contained in its major tile
-        row_start = (tile_row // self._width) * self._width
-        col_start = (tile_col // self._height) * self._height
-        for row_idx in range(row_start, row_start + self._width):
-            for col_idx in range(col_start, col_start + self._height):
-                if self._board[row_idx, col_idx] == guess:
-                    return False
+        for digit in range(1, self._max_digit + 1):
+            if digit in row or digit in col:
+                continue
 
-        return True
+            # Guess not contained in its major tile
+            row_start = (tile_row // self._width) * self._width
+            col_start = (tile_col // self._height) * self._height
+            for row_idx in range(row_start, row_start + self._width):
+                for col_idx in range(col_start, col_start + self._height):
+                    if self._board[row_idx, col_idx] == digit:
+                        continue
+
+            yield digit
 
     def _backtracking(self) -> bool:
         """
@@ -100,24 +111,24 @@ class BacktrackingSolver:
             # No more empty places at the board
             return True
 
-        for guess in range(1, self._max_digit + 1):
-            if self._is_valid_guess(guess=guess, tile_row=row_idx, tile_col=col_idx):
-                self._board[row_idx, col_idx] = guess
+        for guess in self._valid_guesses(tile_row=row_idx, tile_col=col_idx):
+            self._board[row_idx, col_idx] = guess
+            if self._backtracking():
+                # Reached only if the whole puzzle is solved
+                return True
 
-                if self._backtracking():
-                    return True
-
-                # Backtracking all the guesses until the initial one
-                self._board[row_idx, col_idx] = 0
-
+        # Backtracking all the guesses until the initial one
+        self._board[row_idx, col_idx] = 0
         return False
 
     def solve(self):
         """Solves the sudoku and prints the solution"""
-        print(f"Initial state\n{self}")
+        if self._verbose:
+            print(f"Initial state\n{self}")
         if not self._backtracking():
             raise UnsolvableSudoku("The given sudoku doesn't have a solution")
-        print(f"Solution\n{self}")
+        if self._verbose:
+            print(f"Solution\n{self}")
 
     def __str__(self):
         board_repr = ""
