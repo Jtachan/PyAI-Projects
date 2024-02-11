@@ -10,7 +10,7 @@ class UnsolvableSudoku(ValueError):
     """Error for when the sudoku cannot be solved"""
 
 
-class SudokuBackTrkSolver:
+class BacktrackingSolver:
     """Class to solve a sudoku puzzle using backtracking"""
 
     def __init__(self, width: int = 3, height: int = 3, difficulty: float = 0.3):
@@ -28,10 +28,16 @@ class SudokuBackTrkSolver:
             won't contain digits.
         """
         sudoku = Sudoku(width=width, height=height).difficulty(difficulty)
-        self._board = np.array(sudoku.board)
+        self._board = np.array(
+            [
+                [digit if digit is not None else 0 for digit in row]
+                for row in sudoku.board
+            ]
+        )
         self._max_digit = sudoku.size
         self._height = height
         self._width = width
+        self._max_digit = height * width
 
     def _is_valid_guess(self, guess: int, tile_row: int, tile_col: int) -> bool:
         """
@@ -89,7 +95,7 @@ class SudokuBackTrkSolver:
            to be unsolvable.
         """
         try:
-            row_idx, col_idx = np.array(np.where(self._board == None)).T[0]
+            row_idx, col_idx = np.array(np.where(self._board == 0)).T[0]
         except IndexError:
             # No more empty places at the board
             return True
@@ -102,24 +108,39 @@ class SudokuBackTrkSolver:
                     return True
 
                 # Backtracking all the guesses until the initial one
-                self._board[row_idx, col_idx] = None
+                self._board[row_idx, col_idx] = 0
 
         return False
 
     def solve(self):
         """Solves the sudoku and prints the solution"""
-        print(
-            "Initial state:\n"
-            f"{np.where(self._board == None, 'x', self._board.astype(str))}\n"
-        )
+        print(f"Initial state\n{self}")
         if not self._backtracking():
             raise UnsolvableSudoku("The given sudoku doesn't have a solution")
-        print(f"Solution:\n{self}")
+        print(f"Solution\n{self}")
 
     def __str__(self):
-        return str(self._board.astype(str))
+        board_repr = ""
+        hline = "-" * (self._width * 2 + 1) * self._width + "\n"
+        board_1d_size = self._board.shape[0]
+
+        for row_idx in range(board_1d_size):
+            if row_idx % self._height == 0:
+                board_repr += hline
+
+            for col_idx in range(board_1d_size):
+                digit = self._board[row_idx, col_idx]
+
+                board_repr += f"{digit} " if digit != 0 else "  "
+                if col_idx == (board_1d_size - 1):
+                    board_repr += "\n"
+                elif (col_idx + 1) % self._width == 0:
+                    board_repr += "| "
+        board_repr += hline
+
+        return board_repr
 
 
 if __name__ == "__main__":
-    solver = SudokuBackTrkSolver(difficulty=0.9)
+    solver = BacktrackingSolver()
     solver.solve()
