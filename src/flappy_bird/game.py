@@ -27,17 +27,29 @@ class Bird:
 
     Attributes
     ----------
-    x_pos : int
+    PX_SIZE : int
+        Pixel size of the bird at the image. It does not correspond with the image size.
+    MAX_ROTATION : int
+        Maximum value (degrees) of the rotation for the bird.
+    ROTATION_VEL : int
+        Velocity at which the rotation updates every clock-tick.
+    ANIMATION_TIME : int
+        Number of clock-ticks before the bird images change among them.
+    x_pos : float
         Current X position in which the bird is.
-    y_pos : int
+    y_pos : float
         Current Y position in which the bird is.
     tilt : int
         Current rotation (in degrees) to show the bird pointing up or down.
+    tick_count : int
+        Number of frames that passed since the last time the bird jumped.
     vel : float
         Current vertical velocity of the bird. A negative velocity indicates the bird
         is moving upwards (image coordinates).
-    tick_count : int
-        Number of frames that passed since the last time the bird jumped.
+    height : float
+        Vertical position at which the last jump was performed.
+    img_count : int
+        Value to find the current image index for performing the flapping animation.
     """
 
     PX_SIZE = 50
@@ -45,7 +57,7 @@ class Bird:
     ROTATION_VEL = 20
     ANIMATION_TIME = 5
 
-    def __init__(self, x_pos: int, y_pos: int):
+    def __init__(self, x_pos: float, y_pos: float):
         """
         Inits the class
 
@@ -72,7 +84,7 @@ class Bird:
         self.height = self.y_pos
 
     def move(self):
-        """Moves the bird in the vertical axis"""
+        """Moves the bird in the vertical axis and updates its tilt"""
         self.tick_count += 1
 
         # Calculate vertical displacement to update the bird's position
@@ -91,7 +103,18 @@ class Bird:
             self.tilt -= self.ROTATION_VEL
 
     def draw(self, window: Union[pygame.Surface, pygame.SurfaceType]):
+        """
+        Draws the bird on the window, choosing the correct image to draw the bird to
+        create the flapping animation.
+        The image sequence to follow to make it seen the bird is flapping is:
+            [0, 1, 2, 1, 0]
+        The bird stops flapping if its nose is pointing down.
 
+        Parameters
+        ----------
+        window : Surface
+            Display where the bird is drawn
+        """
         if self.tilt <= -80:
             # Stop animation if the bird is falling too much
             # and reset counter in case the bird jumps again
@@ -117,32 +140,56 @@ class Bird:
         # Updating the images at the window
         window.blit(rotated_image, new_rect.topleft)
 
-    def get_collision_mask(self) -> pygame.Mask:
+    @property
+    def collision_mask(self) -> pygame.Mask:
+        """Mask: Area corresponding to the pixels that contain the bird"""
         return pygame.mask.from_surface(self.img)
 
 
 class Pipe:
     """
-    Controls all physics related to the pipes
+    Controls all physics related to the pipes. Each 'Pipe' composes a set of two pipes
+    (top and bottom) with a gap in between for the bird to go through.
+
+    Attributes
+    ----------
+    GAP : int
+        Space among the top and bottom pipes.
+    VEL : int
+        Velocity at which the pipes move.
+    TOP_IMG : Surface
+        Image to be used for the top pipe.
+    BOT_IMG : Surface
+        Image to be used for the bottom pipe.
+    x_pos : float
+        Current horizontal position of the set of pipes.
+    height : float
+        Vertical position corresponding to where the top pipe ends.
+    top : float
+        Vertical position corresponding to where the top pipe is placed.
+    bottom : float
+        Vertical position corresponding to where the bottom pipe is placed.
     """
+
     GAP = 200
     VEL = 5
-
     TOP_IMG = pygame.transform.flip(PIPE_IMG, flip_x=False, flip_y=True)
     BOT_IMG = PIPE_IMG
 
-    def __init__(self, x_pos: int):
+    def __init__(self, x_pos: float):
+        """
+        Inits the class. Each set of pipes are initialized at a random height.
+
+        Parameters
+        ----------
+        x_pos : float
+            Initial X position where the pipes start
+        """
         self.x_pos = x_pos
-        self.height = 0
-        self.top = 0
-        self.bottom = 0
-
-        self.passed = False
-
-    def set_random_height(self):
         self.height = random.randrange(50, 450)
         self.top = self.height - self.TOP_IMG.get_height()
         self.bottom = self.height + self.GAP
+        self.passed = False
 
     def move(self):
         """Updates the pipes' position moving them to the left"""
@@ -155,10 +202,10 @@ class Pipe:
 
     def has_collided(self, bird: Bird) -> bool:
         """
-        Calculates if the bird collides with any of the pipes. Masks are used to obtain
-        a pixel collision, instead of a bounding box collision.
+        Calculates if the bird collides with any of the pipes. Masks are used to
+        obtain a pixel collision, instead of a bounding box collision.
         """
-        bird_collision_mask = bird.get_collision_mask()
+        bird_collision_mask = bird.collision_mask
         top_mask = pygame.mask.from_surface(self.TOP_IMG)
         bottom_mask = pygame.mask.from_surface(self.BOT_IMG)
 
@@ -172,11 +219,36 @@ class Pipe:
 
 
 class Base:
-    """Class to control the ground on the screen"""
+    """
+    Class to control the ground on the screen
+
+    Attributes
+    ----------
+    VEL : int
+        Velocity at which the ground moves. This is the same speed as the used by the
+        pipes.
+    WIDTH : int
+        Width of the image that compose the base.
+    y_pos : float
+        Vertical position where the ground is placed.
+    x_pos_1 : int
+        Horizontal position of the first piece of ground.
+    x_pos_2 : int
+        Horizontal position of the second piece of ground.
+    """
+
     VEL = Pipe.VEL
     WIDTH = BASE_IMG.get_width()
 
-    def __init__(self, y_pos: int):
+    def __init__(self, y_pos: float):
+        """
+        Inits the class.
+
+        Parameters
+        ----------
+        y_pos : float
+            Vertical position where the ground is placed
+        """
         self.y_pos = y_pos
         self.x_pos_1 = 0
         self.x_pos_2 = self.WIDTH
@@ -209,7 +281,7 @@ def draw_window(win, bird):
     pygame.display.update()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     bird = Bird(200, 200)
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     clock = pygame.time.Clock()
@@ -226,4 +298,3 @@ if __name__ == '__main__':
                 run = False
 
     pygame.quit()
-
