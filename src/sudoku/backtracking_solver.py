@@ -4,6 +4,7 @@ Here is contained all codes to solve a sudoku using backtracking
 from typing import Iterator
 
 import numpy as np
+import numpy.typing as npt
 
 from sudoku import Sudoku
 
@@ -17,34 +18,32 @@ class BacktrackingSolver:
 
     def __init__(
         self,
+        board: npt.ArrayLike,
         width: int = 3,
         height: int = 3,
-        difficulty: float = 0.3,
         verbose: bool = True,
     ):
         """
-        Initializes the solver, generating a sudoku with it.
+        Initializes the solver from the given board.
 
         Parameters
         ----------
+        board : array_like
+            Sudoku board defined as a matrix. Empty places should be defined
+            with either '0' or 'None'.
         width : int
             Number of horizontal cells contained in a major cell.
         height : int
             Number of vertical cells contained in a major cell.
-        difficulty : float
-            Difficulty level for the sudoku, defining the percentage of cells that
-            won't contain digits.
         verbose : bool
             If True, prints the initial state and the solution when 'solve()' is called.
         """
-        sudoku = Sudoku(width=width, height=height, seed=123).difficulty(difficulty)
         self._board = np.array(
             [
                 [digit if digit is not None else 0 for digit in row]
-                for row in sudoku.board
+                for row in board
             ]
         )
-        self._max_digit = sudoku.size
         self._height = height
         self._width = width
         self._max_digit = height * width
@@ -153,5 +152,8 @@ class BacktrackingSolver:
 
 
 if __name__ == "__main__":
-    solver = BacktrackingSolver()
+    # The value 'difficulty' should be a float in the range (0, 1). 
+    # It corresponds to the percentaje of empty cells.
+    puzzle = Sudoku().difficulty(0.9)
+    solver = BacktrackingSolver(board=puzzle.board)
     solver.solve()
