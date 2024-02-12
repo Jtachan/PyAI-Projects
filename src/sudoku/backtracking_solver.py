@@ -39,10 +39,7 @@ class BacktrackingSolver:
             If True, prints the initial state and the solution when 'solve()' is called.
         """
         self._board = np.array(
-            [
-                [digit if digit is not None else 0 for digit in row]
-                for row in board
-            ]
+            [[digit if digit is not None else 0 for digit in row] for row in board]
         )
         self._height = height
         self._width = width
@@ -152,7 +149,7 @@ class BacktrackingSolver:
 
 
 if __name__ == "__main__":
-    # The value 'difficulty' should be a float in the range (0, 1). 
+    # The value 'difficulty' should be a float in the range (0, 1).
     # It corresponds to the percentaje of empty cells.
     puzzle = Sudoku().difficulty(0.9)
     solver = BacktrackingSolver(board=puzzle.board)
