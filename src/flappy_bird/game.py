@@ -171,6 +171,38 @@ class Pipe:
         return top_col_point is not None or bot_col_point is not None
 
 
+class Base:
+    """Class to control the ground on the screen"""
+    VEL = Pipe.VEL
+    WIDTH = BASE_IMG.get_width()
+
+    def __init__(self, y_pos: int):
+        self.y_pos = y_pos
+        self.x_pos_1 = 0
+        self.x_pos_2 = self.WIDTH
+
+    def move(self):
+        """
+        Moves the base to create the feeling the bird is the one moving.
+        To create the illusion the path is infinite, two images are placed
+        consecutively. When one image exits the screen from the left, its position is
+        updated to outside the screen on the right (so it enters the next clock-tick).
+        """
+        self.x_pos_1 -= self.VEL
+        self.x_pos_2 -= self.VEL
+
+        if self.x_pos_1 + self.WIDTH < 0:
+            self.x_pos_1 = self.x_pos_2 + self.WIDTH
+
+        if self.x_pos_2 + self.WIDTH < 0:
+            self.x_pos_2 = self.x_pos_1 + self.WIDTH
+
+    def draw(self, window: Union[pygame.Surface, pygame.SurfaceType]):
+        """Draws the top & bottom pipes at the window"""
+        window.blit(BASE_IMG, (self.x_pos_1, self.y_pos))
+        window.blit(BASE_IMG, (self.x_pos_2, self.y_pos))
+
+
 def draw_window(win, bird):
     win.blit(BG_IMG, (0, 0))
     bird.draw(win)
