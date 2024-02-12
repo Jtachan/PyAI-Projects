@@ -40,6 +40,7 @@ class Bird:
         Number of frames that passed since the last time the bird jumped.
     """
 
+    PX_SIZE = 50
     MAX_ROTATION = 25
     ROTATION_VEL = 20
     ANIMATION_TIME = 5
@@ -71,28 +72,23 @@ class Bird:
         self.height = self.y_pos
 
     def move(self):
-        """
-        Moves the bird in all its directions.
-        """
+        """Moves the bird in all its directions"""
         self.tick_count += 1
 
         # Calculate vertical displacement to update the bird's position
         v_displace = min(self.vel * self.tick_count + 1.5 * self.tick_count**2, 16)
-        # v_displace = self.vel * self.tick_count + 1.5 * self.tick_count**2
 
         if v_displace < 0:  # Smoothing jumping trajectory
             v_displace -= 2
 
-        self.y_pos = self.y_pos + v_displace
+        self.y_pos = min(self.y_pos + v_displace, WIN_HEIGHT - self.PX_SIZE)
 
         # Updating tilt of the bird when it is falling from certain point
-        if v_displace < 0 or self.y_pos < (self.height + 50):
-            if self.tilt < self.MAX_ROTATION:
-                self.tilt = self.MAX_ROTATION
-        else:
-            if self.tilt > -90:
-                # Update rotation in falling motion
-                self.tilt -= self.ROTATION_VEL
+        if v_displace < 0 or self.y_pos < (self.height + self.PX_SIZE):
+            self.tilt = self.MAX_ROTATION
+        elif self.tilt > -90:
+            # Update rotation in falling motion
+            self.tilt -= self.ROTATION_VEL
 
     def draw(self, window: Union[pygame.Surface, pygame.SurfaceType]):
 
