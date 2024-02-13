@@ -1,4 +1,8 @@
 """Here is contained the class to control the game"""
+from __future__ import annotations
+
+from typing import Sequence
+
 import _const as cte
 import pygame
 from _elements import Base, Bird, Pipe
@@ -10,28 +14,31 @@ class GameApp:
     classes.
     """
 
-    def __init__(self, bird: Bird, pipes_distance: int, base: Base):
+    def __init__(self, birds: Sequence[Bird], pipes_distance: int):
         """
         Inits the game
 
         Parameters
         ----------
-        bird: Bird
-            Instance of the bird.
+        birds: sequence of Bird
+            Instances of the bird that will run on a single run.
         pipes_distance: int
             Horizontal distance (pixels) that separate each pipe.
-        base: Base
-            Instance of a base.
         """
         self._window = pygame.display.set_mode((cte.WIN_WIDTH, cte.WIN_HEIGHT))
-        self._bird = bird
+        self._birds = birds
         self._clock = pygame.time.Clock()
         self._pipes = [Pipe(pipes_distance)]
-        self._base = base
+        self._base = Base()
 
         self.pipes_distance = pipes_distance
         self.playing = True
         self.score = 0
+
+    @classmethod
+    def human_user_setup(cls) -> GameApp:
+        """Initializes the class for a human to play"""
+        return cls(birds=[Bird()], pipes_distance=600)
 
     def _draw_on_window(self):
         """
@@ -43,7 +50,9 @@ class GameApp:
         for pipe in self._pipes:
             pipe.draw(self._window)
         self._base.draw(self._window)
-        self._bird.draw(self._window)
+
+        for bird in self._birds:
+            bird.draw(self._window)
 
         text = cte.STAT_FONT.render(f"Score: {self.score}", 1, cte.WHITE)
         self._window.blit(
@@ -54,24 +63,26 @@ class GameApp:
 
     def _update_window_elements(self):
         """Calls the 'move' function of all elements and controls the collisions"""
-        if not self._bird.on_the_ground:
-            self._bird.move()
-            self._base.move()
+        add_new_pipe = False
+        self._base.move()
 
-            add_new_pipe = False
-            for pipe in self._pipes:
-                pipe.move()
-                if pipe.has_collided(self._bird):
+        for pipe in self._pipes:
+            pipe.move()
+
+            for bird in self._birds:
+                bird.move()
+
+                if pipe.has_collided(bird):
                     ...
 
-                if not pipe.passed and pipe.x_pos < self._bird.x_pos:
+                if not pipe.passed and pipe.x_pos < bird.x_pos:
                     pipe.passed = True
                     add_new_pipe = True
                     self.score += 1
 
-            self._pipes = [p for p in self._pipes if not p.has_exited]
-            if add_new_pipe:
-                self._pipes.append(Pipe(self.pipes_distance))
+        self._pipes = [p for p in self._pipes if not p.has_exited]
+        if add_new_pipe:
+            self._pipes.append(Pipe(self.pipes_distance))
 
     def run(self):
         """Main loop of the game"""
@@ -88,8 +99,4 @@ class GameApp:
 
 
 if __name__ == "__main__":
-    GameApp(
-        bird=Bird(),
-        base=Base(),
-        pipes_distance=600,
-    ).run()
+    GameApp.human_user_setup().run()
