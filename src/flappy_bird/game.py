@@ -46,14 +46,16 @@ class GameApp:
         self._bird.draw(self._window)
 
         text = cte.STAT_FONT.render(f"Score: {self.score}", 1, cte.WHITE)
-        self._window.blit(text, (cte.WIN_WIDTH - 10 - text.get_width(), 10))
+        self._window.blit(
+            text, (cte.WIN_WIDTH - cte.TEXT_OFFSET - text.get_width(), cte.TEXT_OFFSET)
+        )
 
         pygame.display.update()
 
     def _update_window_elements(self):
         """Calls the 'move' function of all elements and controls the collisions"""
         if not self._bird.on_the_ground:
-            # self._bird.move()
+            self._bird.move()
             self._base.move()
 
             add_new_pipe = False
@@ -74,7 +76,7 @@ class GameApp:
     def run(self):
         """Main loop of the game"""
         while self.playing:
-            self._clock.tick(30)
+            self._clock.tick(cte.TICK_CLOCK)
             self._draw_on_window()
             self._update_window_elements()
 

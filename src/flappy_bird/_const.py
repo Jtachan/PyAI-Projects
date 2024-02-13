@@ -6,6 +6,10 @@ import pygame
 # Dimensions for the game window
 WIN_WIDTH = 500
 WIN_HEIGHT = 800
+TEXT_OFFSET = 10
+
+# Internal values
+TICK_CLOCK = 30
 
 # Fonts for the messages print on the window
 pygame.font.init()

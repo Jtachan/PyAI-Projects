@@ -78,7 +78,8 @@ class Bird:
         if v_displace < 0:  # Smoothing jumping trajectory
             v_displace -= 2
 
-        self.y_pos = min(self.y_pos + v_displace, cte.WIN_HEIGHT - self.PX_SIZE - 70)
+        # Limit y_pos to the top of the base (approx.)
+        self.y_pos = min(self.y_pos + v_displace, cte.WIN_HEIGHT - self.PX_SIZE * 2)
 
         # Updating tilt of the bird when it is falling from certain point
         if v_displace < 0 or self.y_pos < (self.height + self.PX_SIZE):
