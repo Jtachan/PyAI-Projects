@@ -61,6 +61,7 @@ class Bird:
         self.height = self.y_pos
         self.img_count = 0
         self.img = cte.BIRD_IMGS[0]
+        self.alive = True
 
     def jump(self):
         """Makes the bird 'jump' upwards"""
@@ -78,8 +79,10 @@ class Bird:
         if v_displace < 0:  # Smoothing jumping trajectory
             v_displace -= 2
 
-        # Limit y_pos to the top of the base (approx.)
-        self.y_pos = min(self.y_pos + v_displace, cte.WIN_HEIGHT - self.PX_SIZE * 2)
+        # Limit y_pos to the top of the base (approx.) and the top of the screen
+        self.y_pos = max(
+            0, min(self.y_pos + v_displace, cte.WIN_HEIGHT - self.PX_SIZE * 2)
+        )
 
         # Updating tilt of the bird when it is falling from certain point
         if v_displace < 0 or self.y_pos < (self.height + self.PX_SIZE):
@@ -162,7 +165,7 @@ class Pipe:
     """
 
     GAP = 200
-    VEL = 5
+    VEL = 10
     TOP_IMG = pygame.transform.flip(cte.PIPE_IMG, flip_x=False, flip_y=True)
     BOT_IMG = cte.PIPE_IMG
 
@@ -210,7 +213,7 @@ class Pipe:
     @property
     def has_exited(self) -> bool:
         """bool: If the pipe has left the window through the left side"""
-        return self.x_pos + self.TOP_IMG.get_height() < 0
+        return self.x_pos + self.TOP_IMG.get_width() < 0
 
 
 class Base:

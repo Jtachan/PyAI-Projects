@@ -1,11 +1,11 @@
 """Here is contained the class to control the game"""
 from __future__ import annotations
 
-from typing import Sequence
-
 import _const as cte
+import neat
 import pygame
 from _elements import Base, Bird, Pipe
+pygame.font.init()
 
 
 class GameApp:
@@ -14,7 +14,7 @@ class GameApp:
     classes.
     """
 
-    def __init__(self, birds: Sequence[Bird], pipes_distance: int):
+    def __init__(self, birds: list[Bird], pipes_distance: int):
         """
         Inits the game
 
@@ -35,10 +35,22 @@ class GameApp:
         self.playing = True
         self.score = 0
 
+        self._networks: list[neat.nn.FeedForwardNetwork] = None
+        self._genomes: list[neat.DefaultGenome] = None
+
     @classmethod
     def human_user_setup(cls) -> GameApp:
         """Initializes the class for a human to play"""
+        # TODO: Finalize code to be human playable
         return cls(birds=[Bird()], pipes_distance=600)
+
+    def set_network_parameters(
+        self,
+        networks: list[neat.nn.FeedForwardNetwork],
+        genomes: list[neat.DefaultGenome],
+    ):
+        self._networks = networks
+        self._genomes = genomes
 
     def _draw_on_window(self):
         """
@@ -64,25 +76,61 @@ class GameApp:
     def _update_window_elements(self):
         """Calls the 'move' function of all elements and controls the collisions"""
         add_new_pipe = False
-        self._base.move()
+        fail_birds_idx = []
 
+        # Evaluate if the next obstacle pipe is the first (idx = 0) or the second
+        # (idx = 1) on the list.
+        next_pipe_obstacle_idx = int(
+            self._birds[0].x_pos > self._pipes[0].x_pos + Pipe.TOP_IMG.get_width()
+        )
+
+        for bird, (_, genome), net in zip(self._birds, self._genomes, self._networks):
+            bird.move()
+            # Rewarding the bird for staying alive
+            genome.fitness += 0.1
+            output = net.activate(
+                inputs=(
+                    bird.y_pos,
+                    abs(bird.y_pos - self._pipes[next_pipe_obstacle_idx].height),
+                    abs(bird.y_pos - self._pipes[next_pipe_obstacle_idx].bottom),
+                )
+            )
+            if output[0] >= 0.5:
+                bird.jump()
+
+        self._base.move()
         for pipe in self._pipes:
             pipe.move()
 
-            for bird in self._birds:
+            for idx, bird in enumerate(self._birds):
                 bird.move()
 
-                if pipe.has_collided(bird):
-                    ...
+                if pipe.has_collided(bird) or bird.on_the_ground:
+                    fail_birds_idx.append(idx)
+                    self._genomes[idx][1].fitness -= 1
 
                 if not pipe.passed and pipe.x_pos < bird.x_pos:
                     pipe.passed = True
                     add_new_pipe = True
                     self.score += 1
+                    self._genomes[idx][1].fitness += 5
 
         self._pipes = [p for p in self._pipes if not p.has_exited]
         if add_new_pipe:
             self._pipes.append(Pipe(self.pipes_distance))
+
+        birds, genomes, networks = [], [], []
+        for idx, (bird, gen, net) in enumerate(
+            zip(self._birds, self._genomes, self._networks)
+        ):
+            if idx not in fail_birds_idx:
+                birds.append(bird)
+                genomes.append(gen)
+                networks.append(net)
+
+        self._birds = birds
+        self._genomes = genomes
+        self._networks = networks
 
     def run(self):
         """Main loop of the game"""
@@ -91,12 +139,11 @@ class GameApp:
             self._draw_on_window()
             self._update_window_elements()
 
+            if len(self._birds) == 0:
+                self.playing = False
+                break
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.playing = False
-
-        pygame.quit()
-
-
-if __name__ == "__main__":
-    GameApp.human_user_setup().run()
+                    pygame.quit()
