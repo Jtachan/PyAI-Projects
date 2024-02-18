@@ -33,9 +33,7 @@ def fitness(genomes: list[neat.DefaultGenome], config: neat.Config):
         birds.append(Bird())
         networks.append(neat.nn.FeedForwardNetwork.create(genome, config))
 
-    game = GameApp(birds=birds, pipes_distance=600)
-    game.set_network_parameters(networks=networks, genomes=genomes)
-    game.run()
+    GameApp(birds=birds, pipes_distance=600, nets=networks, gens=genomes).run()
 
 
 if __name__ == "__main__":

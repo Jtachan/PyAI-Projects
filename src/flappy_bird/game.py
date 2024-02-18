@@ -1,11 +1,12 @@
 """Here is contained the class to control the game"""
 from __future__ import annotations
 
+from typing import Optional
+
 import _const as cte
 import neat
 import pygame
 from _elements import Base, Bird, Pipe
-pygame.font.init()
 
 
 class GameApp:
@@ -14,7 +15,13 @@ class GameApp:
     classes.
     """
 
-    def __init__(self, birds: list[Bird], pipes_distance: int):
+    def __init__(
+        self,
+        birds: list[Bird],
+        pipes_distance: int,
+        nets: Optional[list[neat.nn.FeedForwardNetwork]] = None,
+        gens: Optional[list[neat.DefaultGenome]] = None,
+    ):
         """
         Inits the game
 
@@ -24,6 +31,10 @@ class GameApp:
             Instances of the bird that will run on a single run.
         pipes_distance: int
             Horizontal distance (pixels) that separate each pipe.
+        nets : list of neat-FeedForwardNetworks, optional
+            Networks to learn from the game.
+        gens : list of neat-DefaultGenome, optional
+            Genomes corresponding to the networks.
         """
         self._window = pygame.display.set_mode((cte.WIN_WIDTH, cte.WIN_HEIGHT))
         self._birds = birds
@@ -35,22 +46,18 @@ class GameApp:
         self.playing = True
         self.score = 0
 
-        self._networks: list[neat.nn.FeedForwardNetwork] = None
-        self._genomes: list[neat.DefaultGenome] = None
+        if nets is not None and gens is not None:
+            self._networks = nets
+            self._genomes = gens
+        else:
+            self._networks, self._genomes = [], []
+            self._genomes = []
 
     @classmethod
     def human_user_setup(cls) -> GameApp:
         """Initializes the class for a human to play"""
         # TODO: Finalize code to be human playable
         return cls(birds=[Bird()], pipes_distance=600)
-
-    def set_network_parameters(
-        self,
-        networks: list[neat.nn.FeedForwardNetwork],
-        genomes: list[neat.DefaultGenome],
-    ):
-        self._networks = networks
-        self._genomes = genomes
 
     def _draw_on_window(self):
         """
