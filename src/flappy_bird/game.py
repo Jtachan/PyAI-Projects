@@ -53,12 +53,6 @@ class GameApp:
             self._networks, self._genomes = [], []
             self._genomes = []
 
-    @classmethod
-    def human_user_setup(cls) -> GameApp:
-        """Initializes the class for a human to play"""
-        # TODO: Finalize code to be human playable
-        return cls(birds=[Bird()], pipes_distance=600)
-
     def _draw_on_window(self):
         """
         Draws all the elements on the window. Each newly drawn element is drawn on
