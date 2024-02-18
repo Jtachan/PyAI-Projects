@@ -7,10 +7,10 @@ Any explanation is documented at the `docs` folder, while all codes are at the `
 ## Completed projects
 
 - [Sudoku solver](docs/sudoku_solver.md)
+- [AI plays Flappy Birds](docs/Neat_Flappy_Bird.md)
 
 ## Ongoing projects
 
 - Maze solver
 - Drowziness detector (ComputerVision)
 - Rock, paper, scissors game (ComputerVision)
-- Flappy Bird played by AI
