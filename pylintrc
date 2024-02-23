@@ -21,8 +21,12 @@ persistent=no
 # usually to register additional checkers.
 load-plugins=
 
-# Use multiple processes to speed up Pylint.
-jobs=4
+# Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
+# number of processors available to use.
+jobs=0
+
+# Discover python modules and packages in the file system subtree.
+recursive=yes
 
 # Allow loading of arbitrary C extensions. Extensions are imported into the
 # active Python interpreter and may run arbitrary code.
@@ -149,16 +153,31 @@ output-format=parseable
 # Tells whether to display a full report or only the messages
 reports=no
 
+# Activate the evaluation score.
+score=no
+
 # Python expression which should return a note less than 10 (10 is the highest
 # note). You have access to the variables errors warning, statement which
 # respectively contain the number of errors / warnings messages and the total
 # number of statements analyzed. This is used by the global evaluation report
 # (RP0004).
-# evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
+evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
 
 # Template used to display messages. This is a python new-style format string
 # used to format the message information. See doc for all details
 #msg-template=
+
+
+[REFACTORING]
+
+# Maximum number of nested blocks for function / method body
+max-nested-blocks=5
+
+# Complete name of functions that never returns. When checking for
+# inconsistent-return-statements if a never returning function is called then
+# it will be considered as an explicit return statement and no message will be
+# printed.
+never-returning-functions=sys.exit,argparse.parse_error
 
 
 [BASIC]
@@ -250,18 +269,14 @@ generated-members=
 [FORMAT]
 
 # Maximum number of characters on a single line.
-max-line-length=80
-
-# TODO(https://github.com/PyCQA/pylint/issues/3352): Direct pylint to exempt
-# lines made too long by directives to pytype.
+max-line-length=88
 
 # Regexp for a line that is allowed to be longer than the limit.
 ignore-long-lines=(?x)(
   ^\s*(\#\ )?<?https?://\S+>?$|
   ^\s*(from\s+\S+\s+)?import\s+.+$)
 
-# Allow the body of an if to be on the same line as the test if there is no
-# else.
+# Allow the body of an if to be on the same line as the test if there is no else.
 single-line-if-stmt=yes
 
 # Maximum number of lines in a module
@@ -282,7 +297,8 @@ expected-line-ending-format=
 [MISCELLANEOUS]
 
 # List of note tags to take in consideration, separated by a comma.
-notes=TODO
+notes=TODO,
+      FIXME
 
 
 [STRING]
@@ -413,6 +429,6 @@ valid-metaclass-classmethod-first-arg=mcs
 
 # Exceptions that will emit a warning when being caught. Defaults to
 # "Exception"
-overgeneral-exceptions=StandardError,
-                       Exception,
-                       BaseException
+overgeneral-exceptions=builtins.StandardError,
+                       builtins.Exception,
+                       builtins.BaseException
