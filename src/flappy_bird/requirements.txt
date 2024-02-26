@@ -1,7 +1,2 @@
-# Python pkgs
 pygame
 neat-python
-
-# Pygame docs: https://www.pygame.org/docs/
-# Neat docs: https://neat-python.readthedocs.io/en/latest/index.html
-# Neat GitHub: https://github.com/CodeReclaimers/neat-python
