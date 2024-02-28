@@ -1,3 +1,5 @@
 # All requirements (from all modules) are installed
+pybase-ext
 -r src/flappy_bird/requirements.txt
 -r src/sudoku/requirements.txt
+-r src/openai/requirements.txt
