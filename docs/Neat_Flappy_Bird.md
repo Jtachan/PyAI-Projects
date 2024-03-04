@@ -10,6 +10,8 @@ When a generation finds a bird which can estimate when to jump with a good accur
 
 ![flappy_nn](imgs/Flappy_bird.gif)
 
+[See the code.](../src/flappy_bird)
+
 The algorithm can be installed and run by anyone. To do so, only two steps are needed:
 
 1. Install the requirements:
