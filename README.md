@@ -20,3 +20,4 @@ Projects are organized by categories:
 - Maze solver
 - Drowziness detector (ComputerVision)
 - Rock, paper, scissors game (ComputerVision)
+- Choose your own adventure AI
