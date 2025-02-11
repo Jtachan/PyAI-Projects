@@ -15,9 +15,3 @@ Projects are organized by categories:
 - **Natural Language Processing**
   - [Llama2 chatbot](docs/llama_chatbot.md)
 
-## Ongoing projects
-
-- Maze solver
-- Drowziness detector (ComputerVision)
-- Rock, paper, scissors game (ComputerVision)
-- Choose your own adventure AI
