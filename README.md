@@ -17,13 +17,13 @@ The algorithm can be installed and run by anyone. To do so, only two steps are n
 1. Install the requirements:
 
 ```shell
-pip install -r src/flappy_bird/requirements.txt
+pip install -r requirements.txt
 ```
 
 2. Launch the code:
 
 ```commandline
-python src/flappy_bird/neat_ai.py
+python src/neat_ai.py
 ```
 
 Playing the game with the computer is not supported by the code.
